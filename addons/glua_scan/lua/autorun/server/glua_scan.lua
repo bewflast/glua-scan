@@ -1,5 +1,5 @@
 local NET_MESSAGE_NAME			= "flscan_files" // !!!SHOULD CHANGE THIS TO ANYTHING ELSE!!!
-local DISCORD_WARNING_WEBHOOK	= ""
+local DISCORD_WARNING_WEBHOOK		= ""
 
 require("CHTTP")
 util.AddNetworkString(NET_MESSAGE_NAME)
@@ -69,9 +69,9 @@ hook.Add("PlayerInitialSpawn", "SendFileCheck",
 local function files_warning(len, ply)
 	if ply.has_been_already_glua_scanned then ply:Ban(0, true) return end // anti-scriptkiddy
 
-	ply.has_been_already_glua_scanned = true
-	local received_user_files = net.ReadString()
-	local not_native_files	= ""
+	ply.has_been_already_glua_scanned	= true
+	local received_user_files		= net.ReadString()
+	local not_native_files			= ""
 
 	for k,v in pairs(JSONToTable(received_user_files)) do
 		if !native_files_list[v] then
@@ -81,11 +81,11 @@ local function files_warning(len, ply)
 
 	if not_native_files == "" then return end
 
-	local name = ply:Nick()
-	local params = 
+	local name	= ply:Nick()
+	local params	= 
 	{
 		['username']	= name,
-		['embeds']		= 
+		['embeds']	= 
 		{ 
 			{
 				title		= "Detected files:",
@@ -97,12 +97,12 @@ local function files_warning(len, ply)
 
 	CHTTP({
 		method  = 'POST',
-		url		= DISCORD_WARNING_WEBHOOK .. '?wait=true',
+		url	= DISCORD_WARNING_WEBHOOK .. '?wait=true',
 		body	= TableToJSON(params),
 		headers = 
 		{
 			["content-Type"]	= "application/json",
-			["accept"]			= "application/json",
+			["accept"]		= "application/json",
 		},
 		type	= "application/json; charset=utf-8"
 	})
