@@ -7,7 +7,7 @@ util.AddNetworkString(NET_MESSAGE_NAME)
 local fileRead			= file.Read
 local TableToJSON		= util.TableToJSON
 local JSONToTable		= util.JSONToTable
-local native_files_list	= {}
+local native_files_list		= {}
 
 
 
