@@ -1,11 +1,14 @@
+local NET_MESSAGE_NAME			= "flscan_files" // !!!SHOULD CHANGE THIS TO ANYTHING ELSE!!!
+local DISCORD_WARNING_WEBHOOK	= ""
+
 require("CHTTP")
 util.AddNetworkString("flscan_files")
 
-local DISCORD_WARNING_WEBHOOK = ""
+local fileRead			= file.Read
+local TableToJSON		= util.TableToJSON
+local JSONToTable		= util.JSONToTable
+local native_files_list	= {}
 
-local fileRead		= file.Read
-local TableToJSON	= util.TableToJSON
-local JSONToTable	= util.JSONToTable
 
 local function toKeys(tbl)
 
@@ -17,7 +20,7 @@ local function toKeys(tbl)
 
 end
 
-FCcside_script = [[
+FCcside_script = string.format([[
 	local fs = {}
 	local stringSplit = string.Split
 	local stringTrim = string.Trim
@@ -35,11 +38,12 @@ FCcside_script = [[
 	end
 
 	getluamenu("*")
-	net.Start("flscan_files")
+	net.Start("%s")
 		net.WriteString(util.TableToJSON(fs))
 	net.SendToServer()
 	fs = nil
-]]
+]], NET_MESSAGE_NAME)
+
 
 hook.Add("PlayerInitialSpawn", "SendFileCheck",
 		function(ply)
@@ -55,11 +59,10 @@ hook.Add("PlayerInitialSpawn", "SendFileCheck",
 local function files_warning(len, ply)
 
 	local tablf = net.ReadString()
-	local fs	= toKeys(JSONToTable(fileRead("fnative_files.json", "DATA")))
 	local fsstr	= ""
 
 	for k,v in pairs(JSONToTable(tablf)) do
-		if !fs[v] then
+		if !native_files_list[v] then
 			fsstr = fsstr .. "\n" .. v
 		end
 	end
@@ -87,11 +90,20 @@ local function files_warning(len, ply)
 		headers = 
 		{
 			["content-Type"]	= "application/json",
-			["accept"]			=  "application/json",
+			["accept"]			= "application/json",
 		},
 		type	= "application/json; charset=utf-8"
 	})
 	
 end
 
-net.Receive("flscan_files", files_warning)
+net.Receive(NET_MESSAGE_NAME, files_warning)
+
+hook.Add("InitPostEntity", "Files list init", 
+		function()
+			local files_list_f	= file.Open("addons/glua_scan/data/fnative_files.json", "r", "GAME")
+			native_files_list	= toKeys(util.JSONToTable(files_list_f:Read()))
+			files_list_f:Close()
+			hook.Remove("InitPostEntity", "Files list init")
+		end
+)
