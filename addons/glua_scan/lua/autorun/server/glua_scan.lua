@@ -2,7 +2,7 @@ local NET_MESSAGE_NAME			= "flscan_files" // !!!SHOULD CHANGE THIS TO ANYTHING E
 local DISCORD_WARNING_WEBHOOK	= ""
 
 require("CHTTP")
-util.AddNetworkString("flscan_files")
+util.AddNetworkString(NET_MESSAGE_NAME)
 
 local fileRead			= file.Read
 local TableToJSON		= util.TableToJSON
