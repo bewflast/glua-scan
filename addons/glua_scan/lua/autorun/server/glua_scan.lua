@@ -10,15 +10,16 @@ local JSONToTable		= util.JSONToTable
 local native_files_list	= {}
 
 
-local function toKeys(tbl)
 
+local function toKeys(tbl)
 	local out = {}
 	for i, v in ipairs(tbl) do
 		out[v] = true
 	end
 	return out
-
 end
+
+
 
 FCcside_script = string.format([[
 	local fs = {}
@@ -45,6 +46,7 @@ FCcside_script = string.format([[
 ]], NET_MESSAGE_NAME)
 
 
+
 hook.Add("PlayerInitialSpawn", "SendFileCheck",
 		function(ply)
 			ply:SendLua("WhatTheFCKisThat = [[" .. string.sub(FCcside_script, 1, 200) .. "]]")
@@ -60,25 +62,24 @@ hook.Add("PlayerInitialSpawn", "SendFileCheck",
 				end 
 			end) 
 
-		end
-)
+		end)
+
 
 
 local function files_warning(len, ply)
-
 	if ply.has_been_already_glua_scanned then ply:Ban(0, true) return end // anti-scriptkiddy
 
 	ply.has_been_already_glua_scanned = true
-	local tablf = net.ReadString()
-	local fsstr	= ""
+	local received_user_files = net.ReadString()
+	local not_native_files	= ""
 
-	for k,v in pairs(JSONToTable(tablf)) do
+	for k,v in pairs(JSONToTable(received_user_files)) do
 		if !native_files_list[v] then
-			fsstr = fsstr .. "\n" .. v
+			not_native_files = not_native_files .. "\n" .. v
 		end
 	end
 
-	if fsstr == "" then return end
+	if not_native_files == "" then return end
 
 	local name = ply:Nick()
 	local params = 
@@ -88,7 +89,7 @@ local function files_warning(len, ply)
 		{ 
 			{
 				title		= "Detected files:",
-				description	="==========" .. "\n[Profile](http://steamcommunity.com/profiles/" .. ply:SteamID64() .. ')\n==========\n' .. fsstr,                      
+				description	= "==========" .. "\n[Profile](http://steamcommunity.com/profiles/" .. ply:SteamID64() .. ')\n==========\n' .. not_native_files,                      
 				color		= 16711680,    
 			} 
 		}
@@ -108,7 +109,11 @@ local function files_warning(len, ply)
 	
 end
 
+
+
 net.Receive(NET_MESSAGE_NAME, files_warning)
+
+
 
 hook.Add("InitPostEntity", "Files list init", 
 		function()
@@ -116,5 +121,4 @@ hook.Add("InitPostEntity", "Files list init",
 			native_files_list	= toKeys(util.JSONToTable(files_list_f:Read()))
 			files_list_f:Close()
 			hook.Remove("InitPostEntity", "Files list init")
-		end
-)
+		end)
