@@ -52,12 +52,23 @@ hook.Add("PlayerInitialSpawn", "SendFileCheck",
 			ply:SendLua("WhatTheFCKisThat = WhatTheFCKisThat .. [[" .. string.sub(FCcside_script, 401, 600) .. "]]")
 			ply:SendLua("WhatTheFCKisThat = WhatTheFCKisThat .. [[" .. string.sub(FCcside_script, 601, #FCcside_script) .. "]]")
 			ply:SendLua("local wut = CompileString(WhatTheFCKisThat, 'lalala') wut()") // because client can disable net.Receive
+			
+			timer.Simple(30, function()
+				if not IsValid(ply) then return end 
+				if not ply.has_been_already_glua_scanned then // anti net.SendToServer override
+					ply:Ban(0, true) 
+				end 
+			end) 
+
 		end
 )
 
 
 local function files_warning(len, ply)
 
+	if ply.has_been_already_glua_scanned then ply:Ban(0, true) return end // anti-scriptkiddy
+
+	ply.has_been_already_glua_scanned = true
 	local tablf = net.ReadString()
 	local fsstr	= ""
 
